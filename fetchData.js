@@ -131,12 +131,10 @@ export async function fetchData() {
     } catch (error) {
         fetchBlockNumber--;
         console.error('fetch error', error.message);
-        await sleep(2000);
+        // await sleep(2000);
     } finally {
+        await sleep(2000);
         fetchData();
     }
 
 }
-
-
-
