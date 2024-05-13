@@ -42,9 +42,50 @@ const StatusSchema = new Schema({
     block:     Number,
 });
 
+const OrderSchema = new Schema({
+    id: {
+        type:String,
+        // 唯一索引
+        unique:true
+    },
+    seller: String, // 0x
+    creator: String,    // 0x
+    listId: String, // 0x txid
+    ticker: String,
+    amount: String,    // 0xa hex
+    price: String,  // 0xa32ef4 hex wei
+    nonce: {
+        type: String,
+        default: '0',
+    }, // '0'
+    listingTime: Number,    // seconds
+    expirationTime: Number,   // seconds
+    creatorFeeRate: {
+        type: Number,
+        default: 0,
+    },  // 200 = 0.2%
+    salt: Number,
+    extraParams: {
+        type: String,
+        default: '0x00',
+    },
+    input: String,
+    status: {
+        type: Number,
+        default: 0,
+    },
+    signature: String,
+    vrs: {
+        v: Number,
+        r: String,
+        s: String,
+    }
+});
+
 const Transaction = model('transaction', TransactionSchema, 'transactions');
 const Evmlog = model('evmlog', EvmlogSchema, 'evmlogs');
 const Status = model('status', StatusSchema, 'status');
+const Order = model('order', OrderSchema, 'orders')
 
 const connectMongo = async () => {
     // connect to database
@@ -164,6 +205,7 @@ export {
     Transaction,
     Evmlog,
     Status,
+    Order,
     getLastBlockNumber,
     getBlockByNumber,
     getEvmLogs,
