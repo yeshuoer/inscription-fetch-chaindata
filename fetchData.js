@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { config, sleep, Transaction, Evmlog, Status, getLastBlockNumber, getBlockByNumber, getEvmLogs, getStatusId } from './global.js';
+import { config, sleep, Transaction, Evmlog, Status, getLastBlockNumber, getBlockByNumber, getEvmLogs, getStatusId, generateSalt, Order } from './global.js';
 
 const inputPrefix = '0x646174613a';
 const topicTransfer = '0x8cdf9e10a7b20e7a9c4e778fc3eb28f2766e438a9856a62eac39fbd2be98cbc2';
@@ -51,6 +51,7 @@ export async function fetchData() {
                 evmLogs: [],
                 timestamp: 0,
                 count: 0,
+                orders: [],
             };
             getBlockByNumber(fetchBlockNumber).then(block => {
                 result.timestamp = parseInt(block.timestamp);
@@ -66,6 +67,34 @@ export async function fetchData() {
                                 timestamp: result.timestamp,
                                 input:     transaction.input
                             });
+                            
+                            if (transaction.input.includes('226f70223a226c69737422')) {
+                                let jsonstr = Buffer.from(transaction.input.slice(2), 'hex').toString().slice(6)
+                                let ascJson = JSON.parse(jsonstr)
+                                // op = 'list'
+                                result.orders.push({
+                                    seller: transaction.from,
+                                    creator: config.CONTRACT_ADDRESS,
+                                    listId: transaction.hash,
+                                    ticker: ascJson.tick,
+                                    amount: '0x' + Number(ascJson.amt).toString(16),
+                                    // price: '0',
+                                    // nonce: '0',
+                                    listingTime: transaction.timestamp,
+                                    // expirationTime: 0,
+                                    // creatorFeeRate: 0,
+                                    salt: generateSalt(),
+                                    // extraParams: '0x00',
+                                    // status: 0,
+                                    input: '',
+                                    signature: '',
+                                    vrs: {
+                                        v: 0,
+                                        r: '0x00',
+                                        s: '0x00',
+                                    }
+                                })
+                            }
                         }
                     }
                 }
@@ -106,6 +135,9 @@ export async function fetchData() {
             session.startTransaction();
             if (result.transactions.length > 0) {
                 await Transaction.insertMany(result.transactions, { session });
+            }
+            if (result.orders.length > 0) {
+                await Order.insertMany(result.orders, { session })
             }
             if (result.evmLogs.length > 0) {
                 for (const evmLog of result.evmLogs) {

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import axios from 'axios';
+import crypto from 'crypto'
 
 axios.defaults.timeout = 5000;
 
@@ -49,17 +50,23 @@ const OrderSchema = new Schema({
         unique:true
     },
     seller: String, // 0x
-    creator: String,    // 0x
+    creator: String,    // 0x contract address
     listId: String, // 0x txid
     ticker: String,
     amount: String,    // 0xa hex
-    price: String,  // 0xa32ef4 hex wei
+    price: {
+        type: String,
+        default: '0',
+    },  // 0xa32ef4 hex wei
     nonce: {
         type: String,
         default: '0',
     }, // '0'
     listingTime: Number,    // seconds
-    expirationTime: Number,   // seconds
+    expirationTime: {
+        type: Number,
+        default: 4871333268,
+    },   // seconds
     creatorFeeRate: {
         type: Number,
         default: 0,
@@ -198,6 +205,11 @@ async function getStatusId() {
     return statusRow._id;
 }
 
+function generateSalt() {
+    let s = crypto.randomInt(100000000, 1000000000).toString()
+    return Number(s)
+}
+
 export {
     config,
     connectMongo,
@@ -210,4 +222,5 @@ export {
     getBlockByNumber,
     getEvmLogs,
     getStatusId,
+    generateSalt
 }
