@@ -6,6 +6,7 @@ import crypto from 'crypto'
 axios.defaults.timeout = 5000;
 
 const config = dotenv.config().parsed;
+const log = console.log.bind(console, '📦')
 
 const { model, Schema } = mongoose;
 const TransactionSchema = new Schema({
@@ -74,7 +75,10 @@ const OrderSchema = new Schema({
         type: Number,
         default: 0,
     },  // 200 = 0.2%
-    salt: Number,
+    salt: {
+        type: Number,
+        default: 0,
+    },
     extraParams: {
         type: String,
         default: '0x00',
@@ -225,5 +229,6 @@ export {
     getBlockByNumber,
     getEvmLogs,
     getStatusId,
-    generateSalt
+    generateSalt,
+    log,
 }
