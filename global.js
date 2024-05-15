@@ -51,7 +51,10 @@ const OrderSchema = new Schema({
     },
     seller: String, // 0x
     creator: String,    // 0x contract address
-    listId: String, // 0x txid
+    listId: {
+        type: String,
+        unique: true,
+    }, // 0x txid
     ticker: String,
     amount: String,    // 0xa hex
     price: {
