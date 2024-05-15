@@ -11,7 +11,7 @@ const log = console.log.bind(console, '📦')
 const { model, Schema } = mongoose;
 const TransactionSchema = new Schema({
     id: {
-        type:String,
+        type: String,
         // 唯一索引
         unique:true
     },
@@ -45,11 +45,6 @@ const StatusSchema = new Schema({
 });
 
 const OrderSchema = new Schema({
-    id: {
-        type:String,
-        // 唯一索引
-        unique:true
-    },
     seller: String, // 0x
     creator: String,    // 0x contract address
     listId: {

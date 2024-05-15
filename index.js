@@ -6,7 +6,6 @@ async function main() {
     await connectMongo();
 
     fetchData();
-
 }
 
 main();
