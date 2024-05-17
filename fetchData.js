@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { config, sleep, Transaction, Evmlog, Status, getLastBlockNumber, getBlockByNumber, getEvmLogs, getStatusId, generateSalt, Order } from './global.js';
+import { config, sleep, Transaction, Evmlog, Status, getLastBlockNumber, getBlockByNumber, getEvmLogs, getStatusId, generateSalt, Order, log } from './global.js';
 
 const inputPrefix = '0x646174613a';
 const topicTransfer = '0x8cdf9e10a7b20e7a9c4e778fc3eb28f2766e438a9856a62eac39fbd2be98cbc2';
@@ -67,8 +67,7 @@ export async function fetchData() {
                                 timestamp: result.timestamp,
                                 input:     transaction.input
                             });
-                            
-                            if (transaction.input.includes('226f70223a226c69737422')) {
+                            if (transaction.input.includes('226f70223a226c69737422') && transaction.input.includes('2270223a226173632d323022')) {
                                 let jsonstr = Buffer.from(transaction.input.slice(2), 'hex').toString().slice(6)
                                 let ascJson = JSON.parse(jsonstr)
                                 // op = 'list'
