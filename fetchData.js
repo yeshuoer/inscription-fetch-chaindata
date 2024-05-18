@@ -53,7 +53,7 @@ export async function fetchData() {
                 count: 0,
                 orders: [],
             };
-            getBlockByNumber(fetchBlockNumber).then(block => {
+            getBlockByNumber(fetchBlockNumber).then(async block => {
                 result.timestamp = parseInt(block.timestamp);
                 if (block.transactions && block.transactions.length > 0) {
                     for (const transaction of block.transactions) {
@@ -67,32 +67,43 @@ export async function fetchData() {
                                 timestamp: result.timestamp,
                                 input:     transaction.input
                             });
-                            if (transaction.input.includes('2270223a226173632d323022')) {
+                            if (transaction.input.includes('2270223a226173632d323022') && transaction.input.includes('226f70223a226c69737422')) {
+                                // asc20 and op=list
                                 let jsonstr = Buffer.from(transaction.input.slice(2), 'hex').toString().slice(6)
                                 let ascJson = JSON.parse(jsonstr)
-                                // op = 'list'
-                                result.orders.push({
-                                    seller: transaction.from,
-                                    creator: config.CONTRACT_ADDRESS,
-                                    listId: transaction.hash,
-                                    ticker: ascJson.tick,
-                                    amount: '0x' + Number(ascJson.amt).toString(16),
-                                    // price: '0',
-                                    // nonce: '0',
-                                    listingTime: 0,
-                                    // expirationTime: 0,
-                                    // creatorFeeRate: 0,
-                                    salt: 0,
-                                    // extraParams: '0x00',
-                                    // status: 0,
-                                    input: '',
-                                    signature: '',
-                                    vrs: {
-                                        v: 0,
-                                        r: '0x00',
-                                        s: '0x00',
-                                    }
+                                log('ascjson', ascJson)
+                                let existed = await Order.findOne({
+                                    listId: transaction.hash
                                 })
+                                log('existed', existed, transaction.hash)
+                                if (existed) {
+                                    // 已经存在了
+                                    log('Already exist!')
+                                } else {
+                                    // op = 'list'
+                                    result.orders.push({
+                                        seller: transaction.from,
+                                        creator: config.CONTRACT_ADDRESS,
+                                        listId: transaction.hash,
+                                        ticker: ascJson.tick,
+                                        amount: '0x' + Number(ascJson.amt).toString(16),
+                                        // price: '0',
+                                        // nonce: '0',
+                                        listingTime: 0,
+                                        // expirationTime: 0,
+                                        // creatorFeeRate: 0,
+                                        salt: 0,
+                                        // extraParams: '0x00',
+                                        // status: 0,
+                                        input: '',
+                                        signature: '',
+                                        vrs: {
+                                            v: 0,
+                                            r: '0x00',
+                                            s: '0x00',
+                                        }
+                                    })
+                                }
                             }
                         }
                     }
